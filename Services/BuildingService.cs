@@ -26,8 +26,8 @@ public class BuildingService
                 list.Add(new Building
                 {
                     BuildingId = (int)reader["building_id"],
-                    BuildingName = reader["building_name"].ToString(),
-                    Location = reader["location"].ToString()
+                    BuildingName = reader["building_name"]?.ToString() ?? "",
+                    Location = reader["location"]?.ToString() ?? ""
                 });
             }
         }
@@ -54,8 +54,8 @@ public class BuildingService
                 return new Building
                 {
                     BuildingId = (int)reader["building_id"],
-                    BuildingName = reader["building_name"].ToString(),
-                    Location = reader["location"].ToString()
+                    BuildingName = reader["building_name"]?.ToString() ?? "",
+                    Location = reader["location"]?.ToString() ?? ""
                 };
             }
         }
