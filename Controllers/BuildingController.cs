@@ -11,6 +11,11 @@ public class BuildingController : ControllerBase
         _service = service;
     }
 
+    private bool IsValidCode(string accessCode)
+    {
+        return accessCode == "SECRET123";
+    }
+
     [HttpGet]
     public IActionResult GetAll()
     {
@@ -26,22 +31,31 @@ public class BuildingController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Create(Building b)
+    public IActionResult Create(Building b, string accessCode)
     {
+        if (!IsValidCode(accessCode))
+            return Unauthorized("Invalid access code");
+
         _service.Create(b);
         return Ok("Created");
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update(int id, Building b)
+    public IActionResult Update(int id, Building b, string accessCode)
     {
+        if (!IsValidCode(accessCode))
+            return Unauthorized("Invalid access code");
+
         _service.Update(id, b);
         return Ok("Updated");
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(int id, string accessCode)
     {
+        if (!IsValidCode(accessCode))
+            return Unauthorized("Invalid access code");
+
         _service.Delete(id);
         return Ok("Deleted");
     }

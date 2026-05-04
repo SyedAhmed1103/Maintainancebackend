@@ -16,6 +16,7 @@ builder.Services.AddScoped<NoticeService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<FundService>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
