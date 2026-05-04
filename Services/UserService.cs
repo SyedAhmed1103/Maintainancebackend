@@ -1,5 +1,4 @@
-﻿using BCrypt.Net;
-using Maintainancebackend.Models;
+﻿using Maintainancebackend.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -12,7 +11,7 @@ public class UserService
         _db = db;
     }
 
-    // ✅ GET USERS (tenant-safe)
+    // ✅ GET ALL
     public async Task<List<User>> GetAllAsync(int buildingId)
     {
         var list = new List<User>();
@@ -21,7 +20,7 @@ public class UserService
         await conn.OpenAsync();
 
         var cmd = new SqlCommand(
-            "SELECT * FROM users WHERE building_id = @buildingId AND is_active = 1", conn);
+            "SELECT * FROM users WHERE building_id = @buildingId", conn);
 
         cmd.Parameters.Add("@buildingId", SqlDbType.Int).Value = buildingId;
 
@@ -29,31 +28,26 @@ public class UserService
 
         while (await reader.ReadAsync())
         {
-            list.Add(MapUser(reader));
+            list.Add(Map(reader));
         }
 
         return list;
     }
 
-    // ✅ CREATE USER
+    // ✅ CREATE
     public async Task CreateAsync(User u)
     {
         using var conn = _db.GetConnection();
         await conn.OpenAsync();
 
         var cmd = new SqlCommand(
-            @"INSERT INTO users 
-              (user_name, mobile_number, password, building_id, role) 
-              VALUES (@name, @mobile, @pass, @building, @role)", conn);
+            @"INSERT INTO users (user_name, mobile_number, password, building_id)
+              VALUES (@name, @mobile, @pass, @building)", conn);
 
         cmd.Parameters.Add("@name", SqlDbType.VarChar, 100).Value = u.user_name;
         cmd.Parameters.Add("@mobile", SqlDbType.VarChar, 15).Value = u.mobile_number;
-
-        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(u.password);
-        cmd.Parameters.Add("@pass", SqlDbType.VarChar, 255).Value = hashedPassword;
-
+        cmd.Parameters.Add("@pass", SqlDbType.VarChar, 255).Value = u.password;
         cmd.Parameters.Add("@building", SqlDbType.Int).Value = u.building_id;
-        cmd.Parameters.Add("@role", SqlDbType.VarChar, 20).Value = u.role ?? "Member";
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -65,7 +59,7 @@ public class UserService
         await conn.OpenAsync();
 
         var cmd = new SqlCommand(
-            "SELECT * FROM users WHERE mobile_number = @mobile AND is_active = 1", conn);
+            "SELECT * FROM users WHERE mobile_number = @mobile", conn);
 
         cmd.Parameters.Add("@mobile", SqlDbType.VarChar, 15).Value = mobile;
 
@@ -73,36 +67,34 @@ public class UserService
 
         if (await reader.ReadAsync())
         {
-            var user = MapUser(reader);
+            var user = Map(reader);
 
-            bool isValid = BCrypt.Net.BCrypt.Verify(password, user.password);
-
-            if (isValid)
+            // ⚠️ Plain text comparison (as per your requirement)
+            if (user.password == password)
                 return user;
         }
 
         return null;
     }
 
-    // ✅ SOFT DELETE (Deactivate)
-    public async Task DeactivateAsync(int userId, int buildingId)
+    // ✅ DELETE
+    public async Task DeleteAsync(int id, int buildingId)
     {
         using var conn = _db.GetConnection();
         await conn.OpenAsync();
 
         var cmd = new SqlCommand(
-            @"UPDATE users 
-              SET is_active = 0 
+            @"DELETE FROM users 
               WHERE user_id = @id AND building_id = @buildingId", conn);
 
-        cmd.Parameters.Add("@id", SqlDbType.Int).Value = userId;
+        cmd.Parameters.Add("@id", SqlDbType.Int).Value = id;
         cmd.Parameters.Add("@buildingId", SqlDbType.Int).Value = buildingId;
 
         await cmd.ExecuteNonQueryAsync();
     }
 
-    // 🧼 MAPPING
-    private User MapUser(SqlDataReader reader)
+    // 🧼 MAP
+    private User Map(SqlDataReader reader)
     {
         return new User
         {
@@ -110,8 +102,7 @@ public class UserService
             user_name = reader["user_name"]?.ToString() ?? "",
             mobile_number = reader["mobile_number"]?.ToString() ?? "",
             password = reader["password"]?.ToString() ?? "",
-            building_id = (int)reader["building_id"],
-            role = reader["role"]?.ToString() ?? "Member"
+            building_id = (int)reader["building_id"]
         };
     }
 }
