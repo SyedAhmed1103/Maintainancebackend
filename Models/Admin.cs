@@ -1,27 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Maintainancebackend.Models
+﻿public class Admin
 {
-    public class Admin
-    {
-        [Key]
-        public int Admin_id { get; set; }
+    public int AdminId { get; set; }
 
-        [Required]
-        public string admin_name { get; set; } = "";
+    public string AdminName { get; set; } = "";
 
-        [Required]
-        public string mobile_number { get; set; } = "";
+    public string MobileNumber { get; set; } = "";
 
-        [Required]
-        public string password { get; set; } = "";
+    public string Password { get; set; } = "";
 
-        [Required]
-        public int building_id { get; set; }
-
-        // Navigation property (optional but good practice)
-        // Navigation property (optional but good practice)
-        public Building? Building { get; set; }
-    }
+    public int BuildingId { get; set; }
 }

@@ -9,6 +9,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<DatabaseService>();
 builder.Services.AddScoped<BuildingService>();
+builder.Services.AddScoped<AdminService>();
 
 var app = builder.Build();
 
