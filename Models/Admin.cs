@@ -21,7 +21,6 @@ namespace Maintainancebackend.Models
         public int building_id { get; set; }
 
         // Navigation property (optional but good practice)
-        // Navigation property (optional but good practice)
         public Building? Building { get; set; }
     }
 }
